@@ -2,8 +2,6 @@ use std::io::BufReader;
 use std::io::BufWriter;
 use std::io::Read;
 use std::io::Write;
-use std::net::IpAddr;
-use std::net::Ipv4Addr;
 use std::net::TcpListener;
 use std::net::TcpStream;
 
