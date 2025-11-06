@@ -1,5 +1,6 @@
 use std::io::BufReader;
 use std::io::BufWriter;
+use std::io::Error;
 use std::io::Read;
 use std::io::Write;
 use std::net::TcpListener;
@@ -29,9 +30,9 @@ impl Connection {
         }
     }
 
-    pub fn read(&mut self) -> Vec<Message> {
+    pub fn read(&mut self) -> Result<Vec<Message>, Error> {
         let mut bytes = [0; 128];
-        let bytes_read = self.stream.read(&mut bytes).expect("Connection terminated.");
+        let bytes_read = self.stream.read(&mut bytes)?;
 
         let mut messages = Vec::with_capacity(bytes.len());
         for i in 0..bytes_read {
@@ -39,10 +40,10 @@ impl Connection {
             messages.push(message);
         }
 
-        return messages;
+        return Ok(messages);
     }
 
-    pub fn write(&mut self, messages: Vec<Message>) {
+    pub fn write(&mut self, messages: Vec<Message>) -> Result<(), Error> {
         let mut bytes = Vec::with_capacity(messages.len());
 
         for message in messages {
@@ -50,8 +51,10 @@ impl Connection {
             bytes.push(byte);
         }
 
-        self.stream.write(&bytes).expect("Connection terminated.");
+        self.stream.write(&bytes)?;
         self.stream.flush().unwrap();
+
+        Ok(())
     }
 }
 
@@ -61,19 +64,21 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new() -> Server {
-        let listener = TcpListener::bind(SERVER_ADDR).unwrap();
+    pub fn new() -> Result<Server, std::io::Error> {
+        let listener = TcpListener::bind(SERVER_ADDR)?;
 
-        Server {
+        let server = Server {
             listener,
             connection: None,
-        }
+        };
+
+        Ok(server)
     }
 
-    pub fn await_connection(&self) -> Connection {
-        let (stream, _addr) = self.listener.accept().unwrap();
+    pub fn await_connection(&self) -> Result<Connection, std::io::Error> {
+        let (stream, _addr) = self.listener.accept()?;
 
-        Connection::new(stream)
+        Ok(Connection::new(stream))
     }
 }
 
@@ -82,15 +87,14 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(address: &str) -> Client {
-        let connection = match TcpStream::connect(address) {
-            Ok(s) => s,
-            Err(e) => panic!("Couldnt connect to server (did you start the server?) {}", e),
+    pub fn new(address: &str) -> Result<Client, std::io::Error> {
+        let connection =  TcpStream::connect(address)?;
+
+        let client = Client { 
+            connection,
         };
 
-        Client { 
-            connection,
-        }
+        Ok(client)
     }
 }
 

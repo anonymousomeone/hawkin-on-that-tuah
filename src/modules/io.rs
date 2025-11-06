@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::io::Error;
 use std::sync::mpsc::{Receiver, Sender};
 use std::{mem, ptr};
 use std::sync::{mpsc, LazyLock, Mutex};
@@ -52,7 +53,7 @@ impl Keyboard {
         }
     } 
 
-    pub fn install_hook(&mut self) {
+    pub fn install_hook(&mut self) -> Result<(), Error>{
         // Create and install the keyboard hook
         unsafe {
             let hook = SetWindowsHookExW(
@@ -63,11 +64,13 @@ impl Keyboard {
             );
     
             if hook.is_null() {
-                panic!("Failed to set keyboard hook!");
+                return Err(Error::last_os_error());
             }
     
             self.hook = Some(hook);
         }
+
+        Ok(())
     }
     
     pub fn uninstall_hook(&self) {
