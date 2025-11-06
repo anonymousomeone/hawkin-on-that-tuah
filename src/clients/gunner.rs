@@ -1,6 +1,6 @@
 use std::{thread, time::Duration};
 
-use crate::{clients::client::Client, modules::{self, errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, io::{KeyState, Keyboard, message_loop_keepalive}, networking::{Connection, Server}}};
+use crate::{clients::client::Client, modules::{self, errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{KeyState, Keyboard, message_loop_keepalive}, networking::{Connection, Server}}};
 
 pub struct Gunner {
     pub keyboard: Keyboard,
@@ -65,7 +65,7 @@ impl Client for Gunner {
                     if key.key_state == KeyState::Up { continue; }
 
                     self.hook_enabled = !self.hook_enabled;
-                    modules::io::Keyboard::set_hooking(self.hook_enabled);
+                    modules::keyboard::Keyboard::set_hooking(self.hook_enabled);
 
                     println!("keyboard hook enabled: {}", self.hook_enabled);
                     continue;

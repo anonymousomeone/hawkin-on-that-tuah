@@ -1,6 +1,6 @@
 use std::{thread, time::Duration};
 
-use crate::{clients::client::Client, modules::{errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, io::{Key, KeyState, Keyboard}, networking::{Client as NetClient, Connection}}};
+use crate::{clients::client::Client, modules::{errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{Key, KeyState, Keyboard}, networking::{Client as NetClient, Connection}}};
 
 pub struct Driver {
     pub client: NetClient,

@@ -6,8 +6,8 @@ use std::io::Write;
 use std::net::TcpListener;
 use std::net::TcpStream;
 
-use super::io::Key;
-use super::io::KeyState;
+use super::keyboard::Key;
+use super::keyboard::KeyState;
 
 pub const SERVER_ADDR: &str = "0.0.0.0:1984";
 
