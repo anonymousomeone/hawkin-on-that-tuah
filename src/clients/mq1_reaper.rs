@@ -1,4 +1,4 @@
-use crate::clients::client::Client;
+use crate::{clients::client::Client, modules::errors::error::HawkTuahError};
 
 pub struct MQ1Reaper {
     pub capture_rect: Rect,
@@ -16,12 +16,12 @@ impl Client for MQ1Reaper {
         }
     }
 
-    fn run(&mut self) {
-
+    fn run(&mut self) -> Result<(), Box<dyn HawkTuahError>> {
+        Ok(())
     }
 }
 
-struct Rect {
+pub struct Rect {
     x: u32,
     y: u32,
     width: u32,

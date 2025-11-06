@@ -1,6 +1,6 @@
 use std::{thread, time::Duration};
 
-use crate::{clients::client::Client, modules::{io::{Key, KeyState, Keyboard}, networking::{Client as NetClient, Connection}}};
+use crate::{clients::client::Client, modules::{errors::error::HawkTuahError, io::{Key, KeyState, Keyboard}, networking::{Client as NetClient, Connection}}};
 
 pub struct Driver {
     pub client: NetClient,
@@ -25,7 +25,7 @@ impl Client for Driver {
         }
     }
 
-    fn run(&mut self) {
+    fn run(&mut self) -> Result<(), Box<dyn HawkTuahError>> {
         loop {
             let messages = self.connection.read();
 

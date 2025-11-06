@@ -1,6 +1,6 @@
 use std::{thread, time::Duration};
 
-use crate::{clients::client::Client, modules::{self, io::{KeyState, Keyboard, message_loop_keepalive}, networking::{Connection, Server}}};
+use crate::{clients::client::Client, modules::{self, errors::error::HawkTuahError, io::{KeyState, Keyboard, message_loop_keepalive}, networking::{Connection, Server}}};
 
 pub struct Gunner {
     pub keyboard: Keyboard,
@@ -28,7 +28,7 @@ impl Client for Gunner {
         }
     }
 
-    fn run(&mut self) {
+    fn run(&mut self) -> Result<(), Box<dyn HawkTuahError>> {
         loop {
             self.keyboard.parse_callbacks();
             let keys = self.keyboard.state_changes.clone();
