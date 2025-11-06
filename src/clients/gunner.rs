@@ -22,7 +22,14 @@ impl Client for Gunner {
 
         let mut keyboard = Keyboard::new();
 
-        keyboard.install_hook();
+        match keyboard.install_hook() {
+            Ok(k) => k,
+            Err(e) => {
+                return Err(Box::new(ConnectionError {
+                    details: format!("Couldnt install keyboard hook {}", e)
+                }));
+            }
+        };
 
             
         println!("Awaiting driver client connection...");
