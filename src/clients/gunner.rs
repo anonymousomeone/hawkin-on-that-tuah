@@ -1,6 +1,6 @@
 use std::{thread, time::Duration};
 
-use crate::{clients::client::Client, modules::{self, errors::error::HawkTuahError, io::{KeyState, Keyboard, message_loop_keepalive}, networking::{Connection, Server}}};
+use crate::{clients::client::Client, modules::{self, errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, io::{KeyState, Keyboard, message_loop_keepalive}, networking::{Connection, Server}}};
 
 pub struct Gunner {
     pub keyboard: Keyboard,
@@ -10,22 +10,39 @@ pub struct Gunner {
 }
 
 impl Client for Gunner {
-    fn setup() -> Gunner {
-        let server = Server::new();
+    fn setup() -> Result<Gunner, Box<dyn HawkTuahError>> {
+        let server = match Server::new() {
+            Ok(s) => s,
+            Err(e) => {
+                return Err(Box::new(ConnectionError {
+                    details: format!("Couldnt start server {}", e)
+                }));
+            }
+        };
+
         let mut keyboard = Keyboard::new();
 
         keyboard.install_hook();
 
             
         println!("Awaiting driver client connection...");
-        let connection = server.await_connection();
+        let connection = match server.await_connection() {
+            Ok(c) => c,
+            Err(e) => {
+                return Err(Box::new(ConnectionError {
+                    details: format!("Driver connection issue {}", e)
+                }));
+            }
+        };
 
-        Gunner {
+        let gunner = Gunner {
             keyboard,
             connection,
             server,
             hook_enabled: false,
-        }
+        };
+
+        Ok(gunner)
     }
 
     fn run(&mut self) -> Result<(), Box<dyn HawkTuahError>> {
@@ -50,7 +67,10 @@ impl Client for Gunner {
                 messages.push(key.into());
             }
 
-            self.connection.write(messages);
+            match self.connection.write(messages) {
+                Ok(_) => {},
+                Err(_) => return Err(Box::new(DisconnectedError {})),
+            };
 
             message_loop_keepalive();
             thread::sleep(Duration::from_millis(5));

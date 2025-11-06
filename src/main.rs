@@ -21,22 +21,49 @@ fn main() {
         "gunner" => CrewType::Gunner,
         "driver" => CrewType::Driver,
         "mq1" => CrewType::MQ1Reaper,
-        _ => panic!("bad type, try again")
+        _ => {
+            println!("bad type, try again");
+            return main();
+        }
     };
 
     let mut client: Box<dyn Client> = match crew_type {
         CrewType::Gunner => {
-            Box::new(clients::gunner::Gunner::setup())
+            match clients::gunner::Gunner::setup() {
+                Ok(gunner) => Box::new(gunner),
+                Err(e) => {
+                    println!("Error occurred during setup: {}", e);
+                    return main();
+                }
+            }
         },
         CrewType::Driver => {
-            Box::new(clients::driver::Driver::setup())
+            match clients::driver::Driver::setup() {
+                Ok(d) => Box::new(d),
+                Err(e) => {
+                    println!("Error occurred during setup: {}", e);
+                    return main();
+                }
+            }
         },
         CrewType::MQ1Reaper => {
-            Box::new(clients::mq1_reaper::MQ1Reaper::setup())
+            match clients::mq1_reaper::MQ1Reaper::setup() {
+                Ok(m) => Box::new(m),
+                Err(e) => {
+                    println!("Error occurred during setup: {}", e);
+                    return main();
+                }
+            }
         },
     };
 
     println!("Connected!");
 
-    client.run();
+    match client.run() {
+        Ok(_) => {},
+        Err(e) => {
+            println!("Error occurred: {}", e);
+            return main();
+        }
+    };
 }
