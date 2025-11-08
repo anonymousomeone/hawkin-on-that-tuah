@@ -1,4 +1,4 @@
-use crate::{clients::client::Client, modules::errors::error::HawkTuahError};
+use crate::{clients::client::Client, modules::{errors::error::HawkTuahError, util::Rect}};
 
 pub struct MQ1Reaper {
     pub capture_rect: Rect,
@@ -23,9 +23,3 @@ impl Client for MQ1Reaper {
     }
 }
 
-pub struct Rect {
-    x: u32,
-    y: u32,
-    width: u32,
-    height: u32,
-}
