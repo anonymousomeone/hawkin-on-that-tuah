@@ -1,10 +1,10 @@
 use std::{thread, time::Duration};
 
-use crate::{clients::client::Client, modules::{self, errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{KeyState, Keyboard, message_loop_keepalive}, networking::{Connection, Server}}};
+use crate::{clients::client::Client, modules::{self, errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{KeyState, Keyboard, message_loop_keepalive}, networking::{TcpConnection, Server}}};
 
 pub struct Gunner {
     pub keyboard: Keyboard,
-    pub connection: Connection,
+    pub connection: TcpConnection,
     pub server: Server,
     pub hook_enabled: bool,
 }
@@ -33,7 +33,7 @@ impl Client for Gunner {
 
             
         println!("Awaiting driver client connection...");
-        let connection = match server.await_connection() {
+        let connection = match server.await_tcp_connection() {
             Ok(c) => c,
             Err(e) => {
                 return Err(Box::new(ConnectionError {

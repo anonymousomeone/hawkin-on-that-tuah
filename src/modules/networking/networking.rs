@@ -5,26 +5,25 @@ use std::io::Read;
 use std::io::Write;
 use std::net::TcpListener;
 use std::net::TcpStream;
+use std::net::UdpSocket;
 
-use super::keyboard::Key;
-use super::keyboard::KeyState;
+use crate::modules::keyboard::Key;
+use crate::modules::keyboard::KeyState;
 
 pub const SERVER_ADDR: &str = "0.0.0.0:1984";
 
 // i love rawdogging tcp
-pub struct Connection {
-    stream: TcpStream,
+pub struct TcpConnection {
     reader: BufReader<TcpStream>,
     writer: BufWriter<TcpStream>,
 }
 
-impl Connection {
-    pub fn new(stream: TcpStream) -> Connection {
+impl TcpConnection {
+    pub fn new(stream: TcpStream) -> TcpConnection {
         let reader = BufReader::new(stream.try_clone().unwrap());
         let writer = BufWriter::new(stream.try_clone().unwrap());
 
-        Connection {
-            stream,
+        TcpConnection {
             reader,
             writer
         }
@@ -32,7 +31,7 @@ impl Connection {
 
     pub fn read(&mut self) -> Result<Vec<Message>, Error> {
         let mut bytes = [0; 128];
-        let bytes_read = self.stream.read(&mut bytes)?;
+        let bytes_read = self.reader.read(&mut bytes)?;
 
         let mut messages = Vec::with_capacity(bytes.len());
         for i in 0..bytes_read {
@@ -51,52 +50,14 @@ impl Connection {
             bytes.push(byte);
         }
 
-        self.stream.write(&bytes)?;
-        self.stream.flush().unwrap();
-
+        self.writer.write(&bytes)?;
         Ok(())
     }
 }
 
-pub struct Server {
-    pub listener: TcpListener,
-    pub connection: Option<TcpStream>
-}
 
-impl Server {
-    pub fn new() -> Result<Server, std::io::Error> {
-        let listener = TcpListener::bind(SERVER_ADDR)?;
 
-        let server = Server {
-            listener,
-            connection: None,
-        };
 
-        Ok(server)
-    }
-
-    pub fn await_connection(&self) -> Result<Connection, std::io::Error> {
-        let (stream, _addr) = self.listener.accept()?;
-
-        Ok(Connection::new(stream))
-    }
-}
-
-pub struct Client {
-    pub connection: TcpStream
-}
-
-impl Client {
-    pub fn new(address: &str) -> Result<Client, std::io::Error> {
-        let connection =  TcpStream::connect(address)?;
-
-        let client = Client { 
-            connection,
-        };
-
-        Ok(client)
-    }
-}
 
 #[derive(Debug)]
 pub enum Message {

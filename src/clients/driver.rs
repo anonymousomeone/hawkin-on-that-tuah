@@ -1,10 +1,10 @@
 use std::{thread, time::Duration};
 
-use crate::{clients::client::Client, modules::{errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{Key, KeyState, Keyboard}, networking::{Client as NetClient, Connection}}};
+use crate::{clients::client::Client, modules::{errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{Key, KeyState, Keyboard}, networking::{Client as NetClient, TcpConnection}}};
 
 pub struct Driver {
     pub client: NetClient,
-    pub connection: Connection,
+    pub connection: TcpConnection,
 }
 
 impl Client for Driver {
@@ -25,7 +25,7 @@ impl Client for Driver {
             }
         };
 
-        let connection = Connection::new(client.connection.try_clone().unwrap());
+        let connection = TcpConnection::new(client.connection.try_clone().unwrap());
         
         let driver = Driver {
             client,
