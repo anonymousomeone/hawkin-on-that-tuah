@@ -3,9 +3,7 @@ use std::io::BufWriter;
 use std::io::Error;
 use std::io::Read;
 use std::io::Write;
-use std::net::TcpListener;
 use std::net::TcpStream;
-use std::net::UdpSocket;
 
 use crate::modules::keyboard::Key;
 use crate::modules::keyboard::KeyState;
