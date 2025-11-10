@@ -1,10 +1,10 @@
-use std::net::{TcpListener, TcpStream, UdpSocket};
+use std::net::{SocketAddr, TcpListener, UdpSocket};
 
 use crate::modules::networking::{SERVER_ADDR, TcpConnection};
 
 pub struct Server {
     pub listener: TcpListener,
-    pub tcp_connection: Option<TcpStream>,
+    pub tcp_connection: Option<TcpConnection>,
     pub udp_connection: Option<UdpSocket>,
 }
 
@@ -21,16 +21,16 @@ impl Server {
         Ok(server)
     }
 
-    pub fn await_tcp_connection(&self) -> Result<TcpConnection, std::io::Error> {
-        let (stream, _addr) = self.listener.accept()?;
+    pub fn await_tcp_connection(&mut self) -> Result<SocketAddr, std::io::Error> {
+        let (stream, addr) = self.listener.accept()?;
+        self.tcp_connection = Some(TcpConnection::new(stream));
 
-        Ok(TcpConnection::new(stream))
+        Ok(addr)
     }
 
-    pub fn await_udp_connection(&self) -> Result<(), std::io::Error> {
+    pub fn await_udp_connection(&self, remote_addr: &str) -> Result<(), std::io::Error> {
         let socket = UdpSocket::bind(SERVER_ADDR)?;
-
-
+        socket.connect(remote_addr)?;
 
         Ok(())
     }

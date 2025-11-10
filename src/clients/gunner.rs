@@ -4,14 +4,13 @@ use crate::{clients::client::Client, modules::{self, errors::{connection::Connec
 
 pub struct Gunner {
     pub keyboard: Keyboard,
-    pub connection: TcpConnection,
     pub server: Server,
     pub hook_enabled: bool,
 }
 
 impl Client for Gunner {
     fn setup() -> Result<Gunner, Box<dyn HawkTuahError>> {
-        let server = match Server::new() {
+        let mut server = match Server::new() {
             Ok(s) => s,
             Err(e) => {
                 return Err(Box::new(ConnectionError {
@@ -33,7 +32,7 @@ impl Client for Gunner {
 
             
         println!("Awaiting driver client connection...");
-        let connection = match server.await_tcp_connection() {
+        let _remote_addr = match server.await_tcp_connection() {
             Ok(c) => c,
             Err(e) => {
                 return Err(Box::new(ConnectionError {
@@ -44,7 +43,6 @@ impl Client for Gunner {
 
         let gunner = Gunner {
             keyboard,
-            connection,
             server,
             hook_enabled: false,
         };
@@ -74,7 +72,7 @@ impl Client for Gunner {
                 messages.push(key.into());
             }
 
-            match self.connection.write(messages) {
+            match self.server.tcp_connection.as_mut().unwrap().write(messages) {
                 Ok(_) => {},
                 Err(_) => return Err(Box::new(DisconnectedError {})),
             };
