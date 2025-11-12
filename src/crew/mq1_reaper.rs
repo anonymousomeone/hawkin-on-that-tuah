@@ -1,10 +1,10 @@
-use crate::{clients::client::Client, modules::{errors::error::HawkTuahError, util::Rect}};
+use crate::{crew::crew::Crew, modules::{errors::error::HawkTuahError, util::Rect}};
 
 pub struct MQ1Reaper {
     pub capture_rect: Rect,
 }
 
-impl Client for MQ1Reaper {
+impl Crew for MQ1Reaper {
     fn setup() -> Result<MQ1Reaper, Box<dyn HawkTuahError>> {
         let mq1 = MQ1Reaper {
             capture_rect: Rect {

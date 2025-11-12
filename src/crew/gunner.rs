@@ -1,6 +1,6 @@
 use std::{thread, time::Duration};
 
-use crate::{clients::client::Client, modules::{self, errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{KeyState, Keyboard, message_loop_keepalive}, networking::{TcpConnection, Server}}};
+use crate::{crew::crew::Crew, modules::{self, errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{KeyState, Keyboard, message_loop_keepalive}, networking::{TcpConnection, Server}}};
 
 pub struct Gunner {
     pub keyboard: Keyboard,
@@ -8,7 +8,7 @@ pub struct Gunner {
     pub hook_enabled: bool,
 }
 
-impl Client for Gunner {
+impl Crew for Gunner {
     fn setup() -> Result<Gunner, Box<dyn HawkTuahError>> {
         let mut server = match Server::new() {
             Ok(s) => s,
@@ -32,14 +32,14 @@ impl Client for Gunner {
 
             
         println!("Awaiting driver client connection...");
-        let _remote_addr = match server.await_tcp_connection() {
-            Ok(c) => c,
-            Err(e) => {
-                return Err(Box::new(ConnectionError {
-                    details: format!("Driver connection issue {}", e)
-                }));
-            }
-        };
+        // let _remote_addr = match server.await_tcp_connection() {
+        //     Ok(c) => c,
+        //     Err(e) => {
+        //         return Err(Box::new(ConnectionError {
+        //             details: format!("Driver connection issue {}", e)
+        //         }));
+        //     }
+        // };
 
         let gunner = Gunner {
             keyboard,
@@ -55,7 +55,7 @@ impl Client for Gunner {
             self.keyboard.parse_callbacks();
             let keys = self.keyboard.state_changes.clone();
             self.keyboard.state_changes.clear();
-            let mut messages = Vec::with_capacity(keys.len());
+            // let mut messages = Vec::with_capacity(keys.len());
 
             for key in keys {
                 // lctrl key
@@ -69,13 +69,13 @@ impl Client for Gunner {
                     continue;
                 }
 
-                messages.push(key.into());
+                // messages.push(key.into());
             }
 
-            match self.server.tcp_connection.as_mut().unwrap().write(messages) {
-                Ok(_) => {},
-                Err(_) => return Err(Box::new(DisconnectedError {})),
-            };
+            // match self.server.tcp_connection.as_mut().unwrap().write(messages) {
+            //     Ok(_) => {},
+            //     Err(_) => return Err(Box::new(DisconnectedError {})),
+            // };
 
             message_loop_keepalive();
             thread::sleep(Duration::from_millis(5));

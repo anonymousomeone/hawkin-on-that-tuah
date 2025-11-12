@@ -1,13 +1,12 @@
 use std::{thread, time::Duration};
 
-use crate::{clients::client::Client, modules::{errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{Key, KeyState, Keyboard}, networking::{Client as NetClient, TcpConnection}}};
+use crate::{CrewType, crew::crew::Crew, modules::{errors::{connection::ConnectionError, disconnected::DisconnectedError, error::HawkTuahError}, keyboard::{Key, KeyState, Keyboard}, networking::Client}};
 
 pub struct Driver {
-    pub client: NetClient,
-    pub connection: TcpConnection,
+    pub client: Client,
 }
 
-impl Client for Driver {
+impl Crew for Driver {
     fn setup() -> Result<Driver, Box<dyn HawkTuahError>> {
         println!("Enter server ip: ");
 
@@ -16,7 +15,7 @@ impl Client for Driver {
 
         println!("Connecting to gunner server...");
 
-        let client = match NetClient::new(&input.trim()) {
+        let client = match Client::new(&input.trim(), CrewType::Driver) {
             Ok(c) => c,
             Err(e) => {
                 return Err(Box::new(ConnectionError {
@@ -25,11 +24,8 @@ impl Client for Driver {
             }
         };
 
-        let connection = TcpConnection::new(client.connection.try_clone().unwrap());
-        
         let driver = Driver {
             client,
-            connection,
         };
 
         Ok(driver)
@@ -37,7 +33,7 @@ impl Client for Driver {
 
     fn run(&mut self) -> Result<(), Box<dyn HawkTuahError>> {
         loop {
-            let messages = match self.connection.read() {
+            let messages = match self.client.tcp_connection.read() {
                 Ok(msgs) => msgs,
                 Err(_) => return Err(Box::new(DisconnectedError {})),
             };

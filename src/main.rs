@@ -1,7 +1,7 @@
 mod modules;
-mod clients;
+mod crew;
 
-use clients::client::Client;
+use crew::crew::Crew;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum CrewType {
@@ -27,9 +27,9 @@ fn main() {
         }
     };
 
-    let mut client: Box<dyn Client> = match crew_type {
+    let mut crew: Box<dyn Crew> = match crew_type {
         CrewType::Gunner => {
-            match clients::gunner::Gunner::setup() {
+            match crew::gunner::Gunner::setup() {
                 Ok(gunner) => Box::new(gunner),
                 Err(e) => {
                     println!("Error occurred during setup: {}", e);
@@ -38,7 +38,7 @@ fn main() {
             }
         },
         CrewType::Driver => {
-            match clients::driver::Driver::setup() {
+            match crew::driver::Driver::setup() {
                 Ok(d) => Box::new(d),
                 Err(e) => {
                     println!("Error occurred during setup: {}", e);
@@ -47,7 +47,7 @@ fn main() {
             }
         },
         CrewType::MQ1Reaper => {
-            match clients::mq1_reaper::MQ1Reaper::setup() {
+            match crew::mq1_reaper::MQ1Reaper::setup() {
                 Ok(m) => Box::new(m),
                 Err(e) => {
                     println!("Error occurred during setup: {}", e);
@@ -59,7 +59,7 @@ fn main() {
 
     println!("Connected!");
 
-    match client.run() {
+    match crew.run() {
         Ok(_) => {},
         Err(e) => {
             println!("Error occurred: {}", e);
